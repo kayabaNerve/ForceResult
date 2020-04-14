@@ -9,6 +9,10 @@ installFiles = @[
     "ForceResult.nim"
 ]
 
+installDirs = @[
+    "ForceResult"
+]
+
 requires "nim > 1.0.4"
 
 proc gatherTests(
