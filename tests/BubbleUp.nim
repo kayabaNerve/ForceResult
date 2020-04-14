@@ -1,8 +1,8 @@
-import ../ForceCheck
+import ../ForceResult
 
 func called(
     a: int
-) {.forceCheck: [
+) {.forceResult: [
     OSError,
     ValueError
 ].} =
@@ -11,7 +11,7 @@ func called(
     else:
         raise newException(ValueError, "This is a ValueError.")
 
-proc caller() {.forceCheck: [
+proc caller() {.forceResult: [
     OSError,
     ValueError
 ].} =

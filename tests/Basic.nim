@@ -1,63 +1,63 @@
-import ../ForceCheck
+import ../ForceResult
 
-proc empty() {.forceCheck: [].} =
+proc empty() {.forceResult: [].} =
     discard
 
-proc publicEmpty*() {.forceCheck: [].} =
+proc publicEmpty*() {.forceResult: [].} =
     discard
 
-proc unneeded() {.forceCheck: [
+proc unneeded() {.forceResult: [
     OSError
 ].} =
     discard
 
 proc multitype(
     a: int or string)
- {.forceCheck: [].} =
+ {.forceResult: [].} =
     discard
 
-var procLambda: proc () {.raises: [].} = proc () {.forceCheck: [].} =
+var procLambda: proc () {.raises: [].} = proc () {.forceResult: [].} =
     discard
 
-proc `!`(a: int) {.forceCheck: [].} =
+proc `!`(a: int) {.forceResult: [].} =
     discard
 
-proc raises() {.forceCheck: [
+proc raises() {.forceResult: [
     OSError
 ].} =
     raise newException(OSError, "")
 
-proc publicRaises*() {.forceCheck: [
+proc publicRaises*() {.forceResult: [
     OSError
 ].} =
     raise newException(OSError, "")
 
-func funcEmpty() {.forceCheck: [].} =
+func funcEmpty() {.forceResult: [].} =
     discard
 
-func funcPublicEmpty*() {.forceCheck: [].} =
+func funcPublicEmpty*() {.forceResult: [].} =
     discard
 
-func funcUnneeded() {.forceCheck: [
+func funcUnneeded() {.forceResult: [
     OSError
 ].} =
     discard
 
-func funcMultitype(a: int or string) {.forceCheck: [].} =
+func funcMultitype(a: int or string) {.forceResult: [].} =
     discard
 
-var funcLambda: proc () {.noSideEffect.} = func () {.forceCheck: [].} =
+var funcLambda: proc () {.noSideEffect.} = func () {.forceResult: [].} =
     discard
 
-func `@`*(a: int) {.forceCheck: [].} =
+func `@`*(a: int) {.forceResult: [].} =
     discard
 
-func funcRaises() {.forceCheck: [
+func funcRaises() {.forceResult: [
     OSError
 ].} =
     raise newException(OSError, "")
 
-func funcPublicRaises*() {.forceCheck: [
+func funcPublicRaises*() {.forceResult: [
     OSError
 ].} =
     raise newException(OSError, "")

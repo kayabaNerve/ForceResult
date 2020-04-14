@@ -1,10 +1,10 @@
-import ../ForceCheck
+import ../ForceResult
 
 import asyncdispatch
 
 proc called(
     x: int
-) {.forceCheck: [
+) {.forceResult: [
     ValueError,
     IndexError
 ], async.} =
@@ -15,15 +15,15 @@ proc called(
 
 proc returning(
     x: int
-): Future[int] {.forceCheck: [], async.} =
+): Future[int] {.forceResult: [], async.} =
     result = x
 
-proc unneeded() {.forceCheck: [
+proc unneeded() {.forceResult: [
     ValueError
 ], async.} =
     return
 
-proc caller() {.forceCheck: [], async.} =
+proc caller() {.forceResult: [], async.} =
     try:
         await called(0)
     except ValueError as e:

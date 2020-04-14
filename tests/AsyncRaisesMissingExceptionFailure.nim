@@ -1,10 +1,10 @@
-import ../ForceCheck
+import ../ForceResult
 
 import asyncdispatch
 
 proc called(
     x: int
-) {.forceCheck: [], async.} =
+) {.forceResult: [], async.} =
     if x == 0:
         raise newException(ValueError, "0")
     elif x == 1:

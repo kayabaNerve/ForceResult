@@ -1,8 +1,8 @@
-import ../ForceCheck
+import ../ForceResult
 
 proc called(
     a: int
-) {.forceCheck: [
+) {.forceResult: [
     recoverable: [
         IOError,
         ValueError
@@ -18,7 +18,7 @@ proc called(
     else:
         raise newException(OSError, "")
 
-proc caller() {.forceCheck: [
+proc caller() {.forceResult: [
     recoverable: [
         IOError,
         ValueError
