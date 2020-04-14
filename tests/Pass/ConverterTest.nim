@@ -4,15 +4,21 @@ type
    A = object
    B = object
 
-converter cA(
+converter toBool(
     a: A
 ): bool {.forceResult: [].} =
    false
 
-converter cB*(
+converter toBool*(
     b: B
-): bool {.forceResult: [].} =
-   true
+): bool {.forceResult: [
+    KeyError
+].} =
+    raise newException(KeyError, "")
 
-discard cA(A())
-discard cB(B())
+discard A().toBool()
+try:
+    discard B().toBool()
+except KeyError:
+    quit(0)
+quit(1)

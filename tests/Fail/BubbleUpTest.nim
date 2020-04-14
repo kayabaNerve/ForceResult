@@ -3,9 +3,10 @@ import ../../ForceResult
 proc called() {.forceResult: [
     KeyError
 ].} =
-    raise newException(KeyError, "This is a KeyError.")
+    raise newException(KeyError, "")
 
-proc failure() {.forceResult: [
+proc main() {.forceResult: [
     KeyError
 ].} =
     called()
+main()

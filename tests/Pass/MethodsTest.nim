@@ -6,10 +6,21 @@ type
 
 method test(
     a: A
-) {.base, forceResult: [].} =
+) {.base, forceResult: [
+    KeyError
+].} =
     discard
 
 method test*(
     b: B
-) {.forceResult: [].} =
-    discard
+) {.forceResult: [
+    KeyError
+].} =
+    raise newException(KeyError, "")
+
+A().test()
+try:
+    B().test()
+except KeyError:
+    quit(0)
+quit(1)

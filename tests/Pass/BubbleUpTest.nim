@@ -11,7 +11,7 @@ func called(
     else:
         raise newException(ValueError, "This is a ValueError.")
 
-proc caller() {.forceResult: [
+proc main() {.forceResult: [
     OSError,
     ValueError
 ].} =
@@ -22,11 +22,8 @@ proc caller() {.forceResult: [
     except ValueError as e:
         raise e
 
-    try:
-        called(1)
-    except OSError as e:
-        raise e
-    except ValueError as e:
-        raise e
-
-caller()
+try:
+    main()
+except OSError:
+    quit(0)
+quit(1)

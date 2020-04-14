@@ -2,45 +2,18 @@ import ../../ForceResult
 
 import asyncdispatch
 
-proc called(
+proc main(
     x: int
 ) {.forceResult: [
     ValueError,
-    IndexError
+    IOError
 ], async.} =
     if x == 0:
-        raise newException(ValueError, "0")
+        raise newException(ValueError, "")
     elif x == 1:
-        raise newException(IndexError, "1")
-
-proc returning(
-    x: int
-): Future[int] {.forceResult: [], async.} =
-    result = x
-
-proc unneeded() {.forceResult: [
-    ValueError
-], async.} =
-    return
-
-proc caller() {.forceResult: [], async.} =
-    try:
-        await called(0)
-    except ValueError as e:
-        echo e.msg
-    except IOError as e:
-        echo e.msg
-    except Exception:
-        echo "Exception."
-
-    try:
-        echo await returning(5)
-    except Exception:
-        echo "Exception"
-
-    try:
-        await unneeded()
-    except Exception:
-        discard
-
-waitFor caller()
+        raise newException(IOError, "")
+try:
+    waitFor main(0)
+except ValueError:
+    quit(0)
+quit(1)

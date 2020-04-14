@@ -1,8 +1,11 @@
 import ../../ForceResult
 
+proc unneeded() {.forceResult: [].} =
+    discard
+
 proc main() {.forceResult: [].} =
     try:
-        discard
-    except:
+        unneeded()
+    except OSError:
         discard
 main()

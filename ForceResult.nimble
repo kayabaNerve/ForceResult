@@ -29,8 +29,11 @@ let nimExe: string = system.findExe("nim")
 proc compile(
     path: string
 ): bool =
-    echo nimExe & " c --out:" & ("build" / stripPath(path).split(".")[0]) & " " & path
-    gorgeEx(nimExe & " c --out:" & ("build" / stripPath(path).split(".")[0]) & " " & path).exitCode == 0
+    var outputFile: string = "build" / stripPath(path).split(".")[0]
+    result = (
+        (gorgeEx(nimExe & " c --out:" & outputFile & " " & path).exitCode == 0) and
+        (gorgeEx(outputFile).exitCode == 0)
+    )
 
 proc pass(
     path: string

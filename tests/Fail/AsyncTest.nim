@@ -2,12 +2,11 @@ import ../../ForceResult
 
 import asyncdispatch
 
-proc called(
+proc main(
     x: int
 ) {.forceResult: [], async.} =
     if x == 0:
-        raise newException(ValueError, "0")
+        raise newException(ValueError, "")
     elif x == 1:
-        raise newException(IOError, "1")
-
-waitFor called(0)
+        raise newException(IOError, "")
+waitFor main(0)
