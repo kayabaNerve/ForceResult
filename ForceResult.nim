@@ -79,89 +79,6 @@ proc rename(
     #Or, if it's not an operator, just overwrite it with a standard ident node.
     function[0] = name
 
-#Checks for a bracket expression which is likely to trigger a bound check.
-#This may have false positives, but should never have a false negative.
-proc isCheckedBracketExpr(
-    node: NimNode
-): bool {.compileTime.} =
-    #If this is a bracket...
-    if node.kind == nnkBracketExpr:
-        #Confirm it has more than one child.
-        if node.len < 2:
-            return false
-
-        if node[0].kind != nnkIdent:
-            return true
-
-        #Switch based on the value.
-        case node[0].strVal:
-            #Overrides for seq definiton/constructor.
-            of "seq":
-                discard
-            of "newSeq":
-                discard
-            #Override for array definition.
-            of "array":
-                discard
-            #Overrides for table definitions/constructors.
-            of "Table":
-                discard
-            of "TableRef":
-                discard
-            of "initTable":
-                discard
-            of "newTable":
-                discard
-            #Return true.
-            else:
-                return true
-
-#Recursively checks this node and every child to see if it's a checked bracket expr.
-proc hasCheckedBracketExpr(
-    node: NimNode
-): bool {.compileTime.} =
-    result = node.isCheckedBracketExpr()
-    if not result:
-        #Check every child.
-        for child in node.children:
-            #If a child has a bracket expr which is checked, return true.
-            if child.hasCheckedBracketExpr():
-                return true
-
-#Inserts `if false: raise newException(IndexError, "")` to disable XDeclaredButNotUsed hints.
-#If there is no `[]` used, it does nothing/
-proc insertUncallableRaiseIndexError(
-    node: NimNode
-) {.compileTime.} =
-    if node.hasCheckedBracketExpr():
-        node.insert(
-            0,
-            newNimNode(
-                nnkIfStmt
-            ).add(
-                newNimNode(
-                    nnkElifBranch
-                ).add(
-                    newIdentNode("false"),
-                    newNimNode(
-                        nnkStmtList
-                    ).add(
-                        newNimNode(
-                            nnkRaiseStmt
-                        ).add(
-                            newNimNode(
-                                nnkCall
-                            ).add(
-                                newIdentNode("newException"),
-                                newIdentNode("IndexError"),
-                                newStrLitNode("")
-                            )
-                        )
-                    )
-                )
-            )
-        )
-
 #Recursively replaces every raise statement in the NimNode with a discard.
 #This function also checks to make sure there's no generic excepts (`except:`).
 proc removeRaises(
@@ -198,7 +115,7 @@ proc removeAsync(
         parent[index].removeAsync(i)
 
 #Make sure the proc/func doesn't allow any Exceptions to bubble up.
-macro forceCheck*(
+macro forceResult*(
     exceptions: untyped,
     original: untyped
 ): untyped =
@@ -244,7 +161,7 @@ macro forceCheck*(
     copy = copy(original)
 
     #Rename it.
-    copy.rename(original.getName() & "_forceCheck")
+    copy.rename(original.getName() & "_forceResult")
 
     #Add the used pragma.
     copy.addPragma(
@@ -276,9 +193,9 @@ macro forceCheck*(
         #If it is async, any raises pragma would be forced to include Exception, which would make it purposeless.
         #The solution to this, is create two copies.
         #As before, one raises nothing and has a blank raises. The other is untouched, other than it being made synchronous, and contains the proper raises pragma.
-        #The first checks bubble up, the second checks that all possible Exceptions were placed in forceCheck (guaranteeing it's a drop-in replacement for raises).
+        #The first checks bubble up, the second checks that all possible Exceptions were placed in forceResult (guaranteeing it's a drop-in replacement for raises).
         asyncCopy = copy(copy)
-        asyncCopy.rename(original.getName() & "_asyncForceCheck")
+        asyncCopy.rename(original.getName() & "_asyncforceResult")
 
     #Add the proper pragma to the original function if it's not async, or the asyncCopy if the original is.
     if not async:
