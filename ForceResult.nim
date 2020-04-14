@@ -126,36 +126,6 @@ macro forceResult*(
         copy: NimNode
         #Define a second copy if this is async (explained below).
         asyncCopy: NimNode
-        #Create arrays for both recoverable/irrecoverable exceptions, and just irrecoverable.
-        both: NimNode = newNimNode(nnkBracket)
-        irrecoverable: NimNode = newNimNode(nnkBracket)
-
-    #Grab the Exceptions.
-    #Check to make sure this isn't an empty array.
-    if exceptions.len > 0:
-        #Check if recoverable/irrecoverable was specified.
-        if exceptions[0].kind == nnkExprColonExpr:
-            case exceptions[0][0].strVal:
-                of "recoverable":
-                    for i in 0 ..< exceptions[0][1].len:
-                        both.add(exceptions[0][1][i])
-                of "irrecoverable":
-                    for i in 0 ..< exceptions[0][1].len:
-                        both.add(exceptions[0][1][i])
-                        irrecoverable.add(exceptions[0][1][i])
-
-            #Allow passing just irrecoverable.
-            if exceptions.len > 1:
-                if exceptions[1][0].strVal == "recoverable":
-                    for i in 0 ..< exceptions[1][1].len:
-                        both.add(exceptions[1][1][i])
-                else:
-                    for i in 0 ..< exceptions[1][1].len:
-                        both.add(exceptions[1][1][i])
-                        irrecoverable.add(exceptions[1][1][i])
-        #If types weren't specified, just set both to exceptions.
-        else:
-            both = exceptions
 
     #Copy the function.
     copy = copy(original)
@@ -197,7 +167,7 @@ macro forceResult*(
         asyncCopy = copy(copy)
         asyncCopy.rename(original.getName() & "_asyncforceResult")
 
-    #Add the proper pragma to the original function if it's not async, or the asyncCopy if the original is.
+    #Add the blank pragma to the original function if it's not async, or the asyncCopy if the original is.
     if not async:
         original.addPragma(
             newNimNode(
@@ -206,7 +176,7 @@ macro forceResult*(
                 newIdentNode(
                     "raises"
                 ),
-                both
+                exceptions
             )
         )
     else:
@@ -217,11 +187,11 @@ macro forceResult*(
                 newIdentNode(
                     "raises"
                 ),
-                both
+                exceptions
             )
         )
 
-    #Add a raises to the copy of just the irrecoverable errors.
+    #Add a blank raises to the copy.
     copy.addPragma(
         newNimNode(
             nnkExprColonExpr
@@ -229,7 +199,7 @@ macro forceResult*(
             newIdentNode(
                 "raises"
             ),
-            irrecoverable
+            newNimNode(nnkBracket)
         )
     )
 
@@ -274,4 +244,5 @@ macro forceResult*(
         )
     )
 
+    echo treeRepr(original)
     return original
