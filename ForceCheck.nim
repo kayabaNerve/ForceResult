@@ -162,65 +162,6 @@ proc insertUncallableRaiseIndexError(
             )
         )
 
-#Recursively checks for `[]` operator usage, and if it finds any, enforces that IndexError is either in the raises OR caught.
-proc boundsCheck(
-    parent: NimNode,
-    index: int
-) {.compileTime.} =
-    #If this is an override node, strip the override out and continue.
-    if (
-        (parent[index].kind == nnkCall) and
-        (parent[index].len > 0) and
-        (parent[index][0].kind == nnkIdent) and
-        (parent[index][0].strVal == "fcBoundsCheckOverride")
-    ):
-        #If there's no checked bracket expression in this block, hint it.
-        if not parent[index].hasCheckedBracketExpr():
-            hint("fcBoundsCheckOverride was used where there's no bounds check to override.")
-
-        parent[index] = parent[index][1]
-        return
-
-    #Is this a try statement which catches IndexError.
-    var tryWithCatch: bool = false
-    #If this is a try statement...
-    if parent[index].kind == nnkTryStmt:
-        #Find the except branch with "IndexError".
-        for child in parent[index]:
-            if child.kind == nnkStmtList:
-                continue
-
-            #Generic except.
-            if child.len == 0:
-                tryWithCatch = true
-                break
-
-            #If there is one, set tryWithCatch.
-            if child[0].kind == nnkInfix:
-                if child[0][1].strVal == "IndexError":
-                    tryWithCatch = true
-                    break
-            elif child[0].strVal == "IndexError":
-                tryWithCatch = true
-                break
-    #If this is a checked bracket expr...
-    elif parent[index].isCheckedBracketExpr():
-        raise newException(Exception, "Code can throw IndexError which was not caught.")
-
-    #If is a try statement which catches IndexError, we shouldn't check its statement list (item 0).
-    #That said, we do need to add an if false: raise newException(IndexError, "") to stop Nim from thinking IndexError isn't used.
-    var start: int = 0
-    if tryWithCatch:
-        #Set start to 1 so we skip the first child.
-        start = 1
-
-        #Insert an uncallable raise IndexError.
-        parent[index][0].insertUncallableRaiseIndexError()
-
-    #Iterate over every child from start and test them.
-    for i in start ..< parent[index].len:
-        boundsCheck(parent[index], i)
-
 #Recursively replaces every raise statement in the NimNode with a discard.
 #This function also checks to make sure there's no generic excepts (`except:`).
 proc removeRaises(
@@ -234,18 +175,6 @@ proc removeRaises(
     #If this is a raise statement, replace it with a discard statement.
     if parent[index].kind == nnkRaiseStmt:
         var replacement: NimNode = newNimNode(nnkDiscardStmt)
-        parent[index].copyChildrenTo(replacement)
-        parent[index] = replacement
-        return
-
-    #If this is an fcRaise statament, replace it as well.
-    if (
-        (parent[index].kind == nnkCommand) and
-        (parent[index][0].kind == nnkIdent) and
-        (parent[index][0].strVal == "fcRaise")
-    ):
-        var replacement: NimNode = newNimNode(nnkDiscardStmt)
-        parent[index].del(0)
         parent[index].copyChildrenTo(replacement)
         parent[index] = replacement
         return
@@ -267,13 +196,6 @@ proc removeAsync(
     #Iterate over every child and do the same there.
     for i in 0 ..< parent[index].len:
         parent[index].removeAsync(i)
-
-#Turn bounds checks from a fatal error into a managable error.
-macro boundsCheck*(
-    function: untyped
-): untyped =
-    function.boundsCheck(6)
-    return function
 
 #Make sure the proc/func doesn't allow any Exceptions to bubble up.
 macro forceCheck*(
@@ -436,18 +358,3 @@ macro forceCheck*(
     )
 
     return original
-
-#Custom version of raise meant as a temporary solution to https://github.com/nim-lang/Nim/issues/11118.
-macro fcRaise*(
-    e: typed
-): untyped =
-    newNimNode(nnkRaiseStmt).add(
-        newNimNode(nnkCall).add(
-            newIdentNode("newException"),
-            newIdentNode(e.getTypeInst()[0].strVal),
-            newNimNode(nnkDotExpr).add(
-                newIdentNode(e.strVal),
-                newIdentNode("msg")
-            )
-        )
-    )
