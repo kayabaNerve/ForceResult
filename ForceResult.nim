@@ -244,5 +244,4 @@ macro forceResult*(
         )
     )
 
-    echo treeRepr(original)
     return original

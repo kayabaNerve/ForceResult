@@ -12,14 +12,16 @@ proc unneeded() {.forceResult: [
     discard
 
 proc multitype(
-    a: int or string)
- {.forceResult: [].} =
+    a: int or string
+) {.forceResult: [].} =
     discard
 
 var procLambda: proc () {.raises: [].} = proc () {.forceResult: [].} =
     discard
 
-proc `!`(a: int) {.forceResult: [].} =
+proc `!`(
+    a: int
+) {.forceResult: [].} =
     discard
 
 proc raises() {.forceResult: [
@@ -43,13 +45,17 @@ func funcUnneeded() {.forceResult: [
 ].} =
     discard
 
-func funcMultitype(a: int or string) {.forceResult: [].} =
+func funcMultitype(
+    a: int or string
+) {.forceResult: [].} =
     discard
 
 var funcLambda: proc () {.noSideEffect.} = func () {.forceResult: [].} =
     discard
 
-func `@`*(a: int) {.forceResult: [].} =
+func `@`*(
+    a: int
+) {.forceResult: [].} =
     discard
 
 func funcRaises() {.forceResult: [

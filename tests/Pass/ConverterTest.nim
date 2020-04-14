@@ -4,10 +4,14 @@ type
    A = object
    B = object
 
-converter cA(a: A): bool {.forceResult: [].} =
+converter cA(
+    a: A
+): bool {.forceResult: [].} =
    false
 
-converter cB*(b: B): bool {.forceResult: [].} =
+converter cB*(
+    b: B
+): bool {.forceResult: [].} =
    true
 
 discard cA(A())
