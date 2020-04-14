@@ -1,4 +1,4 @@
-import ../ForceResult
+import ../../ForceResult
 
 func called(
     a: int

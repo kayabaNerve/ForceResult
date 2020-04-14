@@ -1,4 +1,4 @@
-import ../ForceResult
+import ../../ForceResult
 
 proc called() {.forceResult: [
     KeyError

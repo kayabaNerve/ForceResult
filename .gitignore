@@ -1,0 +1,5 @@
+build/Pass/*
+!build/Pass/.folder
+
+build/Fail/*
+!build/Fail/.folder

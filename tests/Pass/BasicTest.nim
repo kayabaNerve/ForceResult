@@ -1,4 +1,4 @@
-import ../ForceResult
+import ../../ForceResult
 
 proc empty() {.forceResult: [].} =
     discard

@@ -1,4 +1,4 @@
- import ../ForceResult
+ import ../../ForceResult
 
 type
     A = ref object of RootObj
